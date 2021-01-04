@@ -78,10 +78,11 @@ def getSeeds(request, nextroute):
         (v.newxpublist, v.xprivlist) = getxprivs(v.privkeylist)
         v.addresses = []
         checksumSTR = None
-        response = handleResponse('~/yeticold/bitcoin/bin/bitcoin-cli -rpcwallet=yetiwalletpriv getdescriptorinfo "wsh(multi(3,'+v.xprivlist[0]+'/*,'+v.xprivlist[1]+'/*,'+v.xprivlist[2]+'/*,'+v.xprivlist[3]+'/*,'+v.xprivlist[4]+'/*,'+v.xprivlist[5]+'/*,'+v.xprivlist[6]+'/*))"', True)
+        desc = 'wsh(multi(3,'+v.xprivlist[0]+'/0/0/*,'+v.xprivlist[1]+'/0/0/*,'+v.xprivlist[2]+'/0/0/*,'+v.xprivlist[3]+'/0/0/*,'+v.xprivlist[4]+'/0/0/*,'+v.xprivlist[5]+'/0/0/*,'+v.xprivlist[6]+'/0/0/*))'
+        response = handleResponse('~/yeticold/bitcoin/bin/bitcoin-cli -rpcwallet=yetiwalletpriv getdescriptorinfo "'+desc+'"', True)
         checksumSTR = response["checksum"]
         v.pubdesc = response["descriptor"].replace('\n', '')
-        desc = 'wsh(multi(3,'+v.xprivlist[0]+'/*,'+v.xprivlist[1]+'/*,'+v.xprivlist[2]+'/*,'+v.xprivlist[3]+'/*,'+v.xprivlist[4]+'/*,'+v.xprivlist[5]+'/*,'+v.xprivlist[6]+'/*))#'+checksumSTR
+        desc = desc+'#'+checksumSTR
         handleDescriptor(desc, "yetiwalletpriv")
         v.walletimported = True
         path = home + '/Documents'
@@ -169,16 +170,16 @@ def importSeeds(request, currentroute, nextroute):
             xpublist[6] = xpublist[6].split('))')[0]
             descriptorlist = xpublist
             for i in range(0,3):
-                xpub = v.newxpublist[i] + '/*'
+                xpub = v.newxpublist[i] + '/0/0/*'
                 for x in range(0,7):
                     oldxpub = xpublist[x]
                     if xpub == oldxpub:
-                        descriptorlist[x] = (v.xprivlist[i] + '/*')
+                        descriptorlist[x] = (v.xprivlist[i] + '/0/0/*')
                         break
             desc = '"wsh(multi(3,'+descriptorlist[0]+','+descriptorlist[1]+','+descriptorlist[2]+','+descriptorlist[3]+','+descriptorlist[4]+','+descriptorlist[5]+','+descriptorlist[6]+'))'
             response = handleResponse('~/yeticold/bitcoin/bin/bitcoin-cli -rpcwallet=yetiwalletpriv getdescriptorinfo '+desc+'"', True)
             checksum = response["checksum"]
-            handleResponse('~/yeticold/bitcoin/bin/bitcoin-cli -rpcwallet=yetiwalletpriv importdescriptors \'[{ "desc": '+desc+'#'+ checksum +', "timestamp": "now", "active": true}]\'')
+            handleDescriptor(desc+'#'+checksum, "yetiwalletpriv")
             handleResponse('~/yeticold/bitcoin/bin/bitcoin-cli -rpcwallet=yetiwalletpriv rescanblockchain '+blockheight())
             return redirect(nextroute)
         else:
