@@ -60,7 +60,7 @@ def scanDescriptor(request, currentroute, nextroute):
         if response[1] != b'':
             v.error = 'Invalid Descriptor: '+v.pubdesc
             return redirect(currentroute)
-        handleResponse('~/yeticold/bitcoin/bin/bitcoin-cli -rpcwallet=yetiwalletpub importdescriptors \'[{ "desc": "'+v.pubdesc+'", "timestamp": "now", "active": true}]\'')
+        handleDescriptor(v.pubdesc, "yetiwalletpub")
         return redirect(nextroute)
 
 def getSeeds(request, nextroute):
@@ -172,7 +172,7 @@ def importSeeds(request, currentroute, nextroute):
             desc = '"wsh(multi(3,'+descriptorlist[0]+','+descriptorlist[1]+','+descriptorlist[2]+','+descriptorlist[3]+','+descriptorlist[4]+','+descriptorlist[5]+','+descriptorlist[6]+'))'
             response = handleResponse('~/yeticold/bitcoin/bin/bitcoin-cli -rpcwallet=yetiwalletpriv getdescriptorinfo '+desc+'"', True)
             checksum = response["checksum"]
-            handleResponse('~/yeticold/bitcoin/bin/bitcoin-cli -rpcwallet=yetiwalletpriv importdescriptors \'[{ "desc": '+desc+'#'+ checksum +'", "timestamp": "now", "active": true}]\'')
+            handleResponse('~/yeticold/bitcoin/bin/bitcoin-cli -rpcwallet=yetiwalletpriv importdescriptors \'[{ "desc": '+desc+'#'+ checksum +', "timestamp": "now", "active": true}]\'')
             handleResponse('~/yeticold/bitcoin/bin/bitcoin-cli -rpcwallet=yetiwalletpriv rescanblockchain '+blockheight())
             return redirect(nextroute)
         else:

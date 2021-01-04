@@ -56,6 +56,14 @@ def getxprivs(privkeylist):
     handleResponse('~/yeticold/bitcoin/bin/bitcoin-cli unloadwallet "yetiwalletrec"')
     return (v.xpublist, v.xprivlist)
 
+def handleDescriptor(desc, wallet):
+    splitdesc = desc.split('/')
+    if len(splitdesc) == 1:
+        handleResponse('~/yeticold/bitcoin/bin/bitcoin-cli -rpcwallet='+wallet+' importdescriptors \'[{ "desc": '+desc+', "timestamp": "now", "active": true}]\'')
+    else:
+        handleResponse('~/yeticold/bitcoin/bin/bitcoin-cli -rpcwallet='+wallet+' importdescriptors \'[{ "desc": '+desc+', "timestamp": "now", "active": true}]\'')
+        handleResponse('~/yeticold/bitcoin/bin/bitcoin-cli -rpcwallet='+wallet+' importdescriptors \'[{ "desc": '+splitdesc[0]+'/0/1/*, "timestamp": "now", "active": true, "internal": true}]\'')
+
 def createDumpWallet():
 	v.dumpwalletindex = v.dumpwalletindex + 1
 	return '"yetixprivwallet'+str(v.dumpwalletindex)+'"'
