@@ -51,16 +51,22 @@ def openBitcoin(request, currentroute, nextroute, mode, yeti='Warm'):
         else:
             return redirect(currentroute)
 
-def scanDescriptor(request, currentroute, nextroute):
+def scanDescriptor(request, currentroute, nextroute, offline=True):
     if request.method == 'POST':
         v.error = None
         v.pubdesc = request.form['descriptor'].replace('\n','')
-        response = subprocess.Popen('~/yeticold/bitcoin/bin/bitcoin-cli -rpcwallet=yetiwalletpub getdescriptorinfo "'+v.pubdesc+'"', shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-        print(response, 'response for function: ~/yeticold/bitcoin/bin/bitcoin-cli -rpcwallet=yetiwalletpub getdescriptorinfo "'+v.pubdesc+'"')
+        if offline:
+            response = subprocess.Popen('~/yeticold/bitcoin/bin/bitcoin-cli -rpcwallet=yetiwalletpriv getdescriptorinfo "'+v.pubdesc+'"', shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+        else:
+            response = subprocess.Popen('~/yeticold/bitcoin/bin/bitcoin-cli -rpcwallet=yetiwalletpub getdescriptorinfo "'+v.pubdesc+'"', shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+        print(response, 'response for function: check descriptor')
         if response[1] != b'':
             v.error = 'Invalid Descriptor: '+v.pubdesc
             return redirect(currentroute)
-        handleDescriptor(v.pubdesc, "yetiwalletpub")
+        if offline:
+            handleDescriptor(v.pubdesc, "yetiwalletpriv")
+        else:
+            handleDescriptor(v.pubdesc, "yetiwalletpub")
         return redirect(nextroute)
 
 def getSeeds(request, nextroute):
@@ -76,7 +82,7 @@ def getSeeds(request, nextroute):
         checksumSTR = response["checksum"]
         v.pubdesc = response["descriptor"].replace('\n', '')
         desc = 'wsh(multi(3,'+v.xprivlist[0]+'/*,'+v.xprivlist[1]+'/*,'+v.xprivlist[2]+'/*,'+v.xprivlist[3]+'/*,'+v.xprivlist[4]+'/*,'+v.xprivlist[5]+'/*,'+v.xprivlist[6]+'/*))#'+checksumSTR
-        handleResponse('~/yeticold/bitcoin/bin/bitcoin-cli -rpcwallet=yetiwalletpriv importdescriptors \'[{ "desc": "'+desc+'", "timestamp": "now", "active": true}]\'')
+        handleDescriptor(desc, "yetiwalletpriv")
         v.walletimported = True
         path = home + '/Documents'
         for i in range(1,8):
