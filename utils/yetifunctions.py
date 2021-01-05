@@ -61,16 +61,16 @@ def handleDescriptor(desc, wallet):
     print(splitdesc)
     if len(splitdesc) == 1:
         print(desc)
-        handleResponse('~/yeticold/bitcoin/bin/bitcoin-cli -rpcwallet='+wallet+' importdescriptors \'[{ "desc": '+desc+', "timestamp": "now", "active": true}]\'')
+        handleResponse('~/yeticold/bitcoin/bin/bitcoin-cli -rpcwallet='+wallet+' importdescriptors \'[{ "desc": "'+desc+'", "timestamp": "now", "active": true}]\'')
     else:
         print(desc)
-        handleResponse('~/yeticold/bitcoin/bin/bitcoin-cli -rpcwallet='+wallet+' importdescriptors \'[{ "desc": '+desc+', "timestamp": "now", "active": true}]\'')
+        handleResponse('~/yeticold/bitcoin/bin/bitcoin-cli -rpcwallet='+wallet+' importdescriptors \'[{ "desc": "'+desc+'", "timestamp": "now", "active": true}]\'')
         descinternal = desc.replace('/0/0/*', '/0/1/*')
         print(descinternal)
         response = handleResponse('~/yeticold/bitcoin/bin/bitcoin-cli -rpcwallet='+wallet+' getdescriptorinfo "'+descinternal+'"', True)
         checksum = response["checksum"]
         print(checksum)
-        handleResponse('~/yeticold/bitcoin/bin/bitcoin-cli -rpcwallet='+wallet+' importdescriptors \'[{ "desc": '+descinternal+'#'+checksum+', "timestamp": "now", "active": true, "internal": true}]\'')
+        handleResponse('~/yeticold/bitcoin/bin/bitcoin-cli -rpcwallet='+wallet+' importdescriptors \'[{ "desc": "'+descinternal+'#'+checksum+'", "timestamp": "now", "active": true, "internal": true}]\'')
 
 def createDumpWallet():
 	v.dumpwalletindex = v.dumpwalletindex + 1
